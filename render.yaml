@@ -27,7 +27,9 @@ services:
       - key: VITE_API_URL
         value: https://osm-broker-api.onrender.com/api
       - key: VITE_AUTH_ENABLED
-        value: "false"
+        value: "true"
+      - key: VITE_OSM_CLIENT_ID
+        value: ""  # inserisci il Client ID OAuth2 da openstreetmap.org/oauth2/applications
 
   # ── 2. API (FastAPI + GDAL) ──────────────────────────────────────────────
   - type: web

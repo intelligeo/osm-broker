@@ -114,8 +114,9 @@ export function useAuth(): UseAuthResult {
 
   // ── signIn ────────────────────────────────────────────────────────────
   const signIn = useCallback(() => {
-    if (!AUTH_ENABLED || !CLIENT_ID) {
-      console.warn('[useAuth] AUTH_ENABLED o VITE_OSM_CLIENT_ID non configurati.')
+    if (!AUTH_ENABLED) return
+    if (!CLIENT_ID) {
+      alert('Configurazione OAuth2 OSM mancante.\nImposta VITE_OSM_CLIENT_ID nella dashboard Render.')
       return
     }
     const auth = getAuth()!
@@ -143,7 +144,7 @@ export function useAuth(): UseAuthResult {
     user,
     isLoading,
     isAuthenticated: !!user,
-    authEnabled: AUTH_ENABLED && !!CLIENT_ID,
+    authEnabled: AUTH_ENABLED,
     signIn,
     signOut,
   }

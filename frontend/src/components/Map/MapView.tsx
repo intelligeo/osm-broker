@@ -12,12 +12,15 @@ const MAX_AREA_KM2 = 500
 
 interface MapViewProps {
   onAOIChange: (aoi: AOIFeature | null, areaKm2: number) => void
+  onDrawReady?: (drawPolygon: () => void, clearPolygon: () => void) => void
 }
 
-export default function MapView({ onAOIChange }: MapViewProps) {
+export default function MapView({ onAOIChange, onDrawReady }: MapViewProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<maplibregl.Map | null>(null)
   const drawRef = useRef<MapboxDraw | null>(null)
+  const onDrawReadyRef = useRef(onDrawReady)
+  useEffect(() => { onDrawReadyRef.current = onDrawReady }, [onDrawReady])
 
   const handleDrawChange = useCallback(() => {
     if (!drawRef.current) return
@@ -69,10 +72,6 @@ export default function MapView({ onAOIChange }: MapViewProps) {
 
     const draw = new MapboxDraw({
       displayControlsDefault: false,
-      controls: {
-        polygon: true,
-        trash: true,
-      },
       defaultMode: 'simple_select',
       styles: drawStyles(),
     })
@@ -89,6 +88,13 @@ export default function MapView({ onAOIChange }: MapViewProps) {
 
     mapRef.current = map
     drawRef.current = draw
+
+    if (onDrawReadyRef.current) {
+      onDrawReadyRef.current(
+        () => draw.changeMode('draw_polygon'),
+        () => { draw.deleteAll(); handleDrawChange() },
+      )
+    }
 
     return () => {
       map.remove()

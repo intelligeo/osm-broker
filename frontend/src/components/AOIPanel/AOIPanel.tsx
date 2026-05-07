@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Layers, Package, AlertTriangle, CheckCircle2, Loader2, Download, RefreshCw, X } from 'lucide-react'
+import { Layers, Package, AlertTriangle, CheckCircle2, Loader2, Download, RefreshCw, X, PenLine, Trash2 } from 'lucide-react'
 import FormatSelector from '../FormatSelector/FormatSelector'
 import type { ExportFormat, AOIFeature, Job } from '../../types'
 import { downloadUrl } from '../../services/api'
@@ -17,9 +17,11 @@ interface AOIPanelProps {
   onSubmit: (fmt: ExportFormat, symbology: boolean) => void
   onReset: () => void
   onClose: () => void
+  onDrawPolygon?: () => void
+  onClearPolygon?: () => void
 }
 
-export default function AOIPanel({ aoi, areaKm2, job, error, onSubmit, onReset, onClose }: AOIPanelProps) {
+export default function AOIPanel({ aoi, areaKm2, job, error, onSubmit, onReset, onClose, onDrawPolygon, onClearPolygon }: AOIPanelProps) {
   const [format, setFormat] = useState<ExportFormat>('gpkg')
   const [symbology, setSymbology] = useState(true)
 
@@ -57,10 +59,43 @@ export default function AOIPanel({ aoi, areaKm2, job, error, onSubmit, onReset, 
           <p className="text-xs font-semibold tracking-widest text-ink-light uppercase mb-2">
             Area of Interest
           </p>
+
+          {/* ── Bottoni draw ─────────────────────────────────── */}
+          <div className="flex gap-2 mb-3">
+            <button
+              type="button"
+              onClick={onDrawPolygon}
+              disabled={!onDrawPolygon || busy}
+              className={clsx(
+                'flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                onDrawPolygon && !busy
+                  ? 'bg-brand-500 hover:bg-brand-600 text-white shadow-sm'
+                  : 'bg-surface-subtle text-ink-light cursor-not-allowed',
+              )}
+            >
+              <PenLine className="w-3.5 h-3.5" />
+              Disegna poligono
+            </button>
+            <button
+              type="button"
+              onClick={onClearPolygon}
+              disabled={!onClearPolygon || !aoi}
+              title="Cancella poligono"
+              className={clsx(
+                'inline-flex items-center justify-center rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                onClearPolygon && aoi
+                  ? 'bg-red-50 hover:bg-red-100 text-red-600 border border-red-200'
+                  : 'bg-surface-subtle text-ink-light cursor-not-allowed',
+              )}
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
           {!aoi && areaKm2 === 0 && (
             <div className="rounded-lg border border-dashed border-surface-border bg-white p-4 text-center">
               <p className="text-sm text-ink-muted">
-                Usa lo strumento ▱ sulla mappa per disegnare un poligono.
+                Clicca <strong>Disegna poligono</strong> e tracciale l&apos;area sulla mappa.
               </p>
             </div>
           )}

@@ -10,12 +10,17 @@ export default function App() {
   const [aoi, setAoi] = useState<AOIFeature | null>(null)
   const [areaKm2, setAreaKm2] = useState(0)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [drawFns, setDrawFns] = useState<{ drawPolygon: () => void; clearPolygon: () => void } | null>(null)
   const { job, error, submit, reset } = useJob()
   const { user, isLoading, authEnabled, signIn, signOut } = useAuth()
 
   const handleAOIChange = useCallback((feature: AOIFeature | null, km2: number) => {
     setAoi(feature)
     setAreaKm2(km2)
+  }, [])
+
+  const handleDrawReady = useCallback((drawPolygon: () => void, clearPolygon: () => void) => {
+    setDrawFns({ drawPolygon, clearPolygon })
   }, [])
 
   const handleSubmit = useCallback(
@@ -61,17 +66,18 @@ export default function App() {
             onSubmit={handleSubmit}
             onReset={reset}
             onClose={() => setSidebarOpen(false)}
+            onDrawPolygon={drawFns?.drawPolygon}
+            onClearPolygon={drawFns?.clearPolygon}
           />
         </div>
 
         {/* Mappa */}
         <main className="flex-1 relative min-w-0">
-          <MapView onAOIChange={handleAOIChange} />
+          <MapView onAOIChange={handleAOIChange} onDrawReady={handleDrawReady} />
           {!aoi && areaKm2 === 0 && (
             <div className="absolute bottom-12 left-1/2 -translate-x-1/2 pointer-events-none">
               <div className="panel-glass px-4 py-2 text-sm text-ink-muted flex items-center gap-2 shadow-panel">
-                <span>▱</span>
-                <span>Clicca sul pulsante poligono per disegnare l&apos;area di interesse</span>
+                <span>Usa il pannello a sinistra per disegnare l&apos;area di interesse</span>
               </div>
             </div>
           )}
