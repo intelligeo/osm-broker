@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Base ─────────────────────────────────────────────── */
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html, body, #root {
+    height: 100%;
+    margin: 0;
+  }
+
+  :root {
+    --map-height: calc(100vh - 4rem); /* 4rem = navbar */
+  }
+}
+
+/* ── Custom utilities ─────────────────────────────────── */
+@layer utilities {
+  .map-full {
+    height: var(--map-height);
+  }
+
+  /* glass-morphism panel usato nei side panel */
+  .panel-glass {
+    @apply bg-white/90 backdrop-blur-md border border-surface-border shadow-panel rounded-xl2;
+  }
+}
+
+/* ── MapLibre overrides ───────────────────────────────── */
+.maplibregl-ctrl-group {
+  border-radius: 0.5rem !important;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.12) !important;
+}
+
+.maplibregl-ctrl-group button {
+  width: 36px !important;
+  height: 36px !important;
+}
+
+/* ── Scrollbar sottile ────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track  { background: transparent; }
+::-webkit-scrollbar-thumb  { background-color: #dde2ec; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background-color: #8a93a8; }

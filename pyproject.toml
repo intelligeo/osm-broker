@@ -1,0 +1,15 @@
+[tool.pytest.ini_options]
+testpaths = ["backend/tests"]
+pythonpath = ["backend"]
+asyncio_mode = "auto"
+addopts = "-v --tb=short"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+select = ["E", "F", "I", "UP"]
+ignore = ["E501"]
+exclude = ["__pycache__", ".venv", "dist"]
+
+[tool.ruff.isort]
+known-first-party = ["app"]

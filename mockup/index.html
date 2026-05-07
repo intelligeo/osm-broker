@@ -1,0 +1,603 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OSM Broker — Mockup</title>
+  <link rel="preconnect" href="https://fonts.bunny.net" />
+  <link href="https://fonts.bunny.net/css?family=inter:300,400,500,600,700|jetbrains-mono:400,500&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset & base ───────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; font-family: 'Inter', system-ui, sans-serif; background: #f7f8fa; color: #1a1f2e; -webkit-font-smoothing: antialiased; }
+
+    /* ── Tokens ─────────────────────────────────────────────── */
+    :root {
+      --brand:        #2f5ff5;
+      --brand-dark:   #1e44d4;
+      --brand-light:  #dce6ff;
+      --brand-faint:  #f0f4ff;
+      --ink:          #1a1f2e;
+      --ink-muted:    #4e5668;
+      --ink-light:    #8a93a8;
+      --surface:      #ffffff;
+      --surface-muted:#f7f8fa;
+      --surface-sub:  #eef1f6;
+      --border:       #dde2ec;
+      --green:        #16a34a;
+      --green-bg:     #f0fdf4;
+      --green-border: #bbf7d0;
+      --amber:        #d97706;
+      --red:          #dc2626;
+      --red-bg:       #fef2f2;
+      --red-border:   #fecaca;
+      --shadow-panel: 0 1px 4px rgb(0 0 0/.08), 0 4px 16px rgb(0 0 0/.06);
+      --shadow-card:  0 1px 3px rgb(0 0 0/.10);
+      --radius:       12px;
+    }
+
+    /* ── Layout shell ───────────────────────────────────────── */
+    .shell { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+    /* ── Navbar ─────────────────────────────────────────────── */
+    .navbar {
+      height: 64px; background: var(--surface); border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 24px; gap: 12px;
+      box-shadow: var(--shadow-card); position: relative; z-index: 10; flex-shrink: 0;
+    }
+    .logo-box {
+      width: 34px; height: 34px; border-radius: 9px; background: var(--brand);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .logo-box svg { width: 18px; height: 18px; fill: #fff; }
+    .logo-text { font-size: 18px; font-weight: 600; letter-spacing: -.5px; }
+    .logo-text span { color: var(--brand); }
+    .divider { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+    .tagline { font-size: 13px; color: var(--ink-muted); }
+    .navbar-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+    .live-badge {
+      display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500;
+      color: var(--ink-light); background: var(--surface-sub); border: 1px solid var(--border);
+      border-radius: 999px; padding: 3px 12px;
+    }
+    .live-dot { width: 8px; height: 8px; background: #4ade80; border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+    .github-link { color: var(--ink-light); display: flex; align-items: center; text-decoration: none; }
+    .github-link:hover { color: var(--ink); }
+    .github-link svg { width: 20px; height: 20px; }
+
+    /* ── Body area ──────────────────────────────────────────── */
+    .body { display: flex; flex: 1; overflow: hidden; }
+
+    /* ── Sidebar ────────────────────────────────────────────── */
+    .sidebar {
+      width: 320px; flex-shrink: 0; display: flex; flex-direction: column;
+      background: var(--surface-muted); border-right: 1px solid var(--border); overflow-y: auto;
+    }
+    .sidebar-header {
+      padding: 16px 20px; border-bottom: 1px solid var(--border); background: var(--surface);
+    }
+    .sidebar-title { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+    .sidebar-title svg { width: 16px; height: 16px; color: var(--brand); }
+    .sidebar-sub { font-size: 12px; color: var(--ink-light); margin-top: 3px; }
+    .sidebar-body { padding: 20px; display: flex; flex-direction: column; gap: 20px; flex: 1; }
+
+    /* section label */
+    .section-label {
+      font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+      color: var(--ink-light); margin-bottom: 8px;
+    }
+
+    /* AOI status */
+    .aoi-empty {
+      border: 1.5px dashed var(--border); border-radius: 10px; background: var(--surface);
+      padding: 18px 16px; text-align: center; font-size: 13px; color: var(--ink-muted);
+    }
+    .aoi-ok {
+      border: 1px solid var(--green-border); border-radius: 10px; background: var(--green-bg);
+      padding: 10px 14px; display: flex; align-items: center; gap: 8px;
+      font-size: 13px; font-weight: 600; color: var(--green);
+    }
+    .aoi-ok svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .aoi-warn {
+      border: 1px solid var(--red-border); border-radius: 10px; background: var(--red-bg);
+      padding: 10px 14px; font-size: 13px; color: var(--red);
+    }
+    .aoi-warn .warn-row { display: flex; align-items: center; gap: 8px; font-weight: 600; margin-bottom: 3px; }
+    .aoi-warn svg { width: 16px; height: 16px; }
+
+    /* format grid */
+    .fmt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .fmt-card {
+      border: 1px solid var(--border); border-radius: 10px; background: var(--surface);
+      padding: 12px; cursor: pointer; text-align: left; transition: border .15s, background .15s;
+    }
+    .fmt-card:hover { border-color: #b9ccff; background: var(--brand-faint); }
+    .fmt-card.active { border-color: var(--brand); background: var(--brand-faint); box-shadow: 0 0 0 1px var(--brand); }
+    .fmt-icon { font-size: 17px; }
+    .fmt-name { font-size: 12px; font-weight: 600; color: var(--ink); margin-top: 4px; }
+    .fmt-desc { font-size: 11px; color: var(--ink-light); margin-top: 2px; line-height: 1.35; }
+    .fmt-ext  { font-size: 10px; color: var(--ink-light); font-family: 'JetBrains Mono', monospace; margin-top: 4px; }
+
+    /* toggle */
+    .toggle-row { display: flex; align-items: center; gap: 12px; }
+    .toggle-track {
+      width: 36px; height: 20px; border-radius: 999px; background: var(--brand);
+      position: relative; cursor: pointer; flex-shrink: 0; transition: background .2s;
+    }
+    .toggle-thumb {
+      position: absolute; top: 3px; left: calc(100% - 17px);
+      width: 14px; height: 14px; border-radius: 50%; background: #fff;
+      box-shadow: 0 1px 3px rgb(0 0 0/.2); transition: left .2s;
+    }
+    .toggle-label .label-main { font-size: 13px; font-weight: 500; color: var(--ink); }
+    .toggle-label .label-sub  { font-size: 11px; color: var(--ink-light); }
+
+    /* CTA button */
+    .btn-export {
+      width: 100%; border: none; cursor: pointer; border-radius: 10px;
+      padding: 13px; font-size: 14px; font-weight: 600; font-family: inherit;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: background .15s, opacity .15s;
+    }
+    .btn-export.ready { background: var(--brand); color: #fff; }
+    .btn-export.ready:hover { background: var(--brand-dark); }
+    .btn-export.disabled { background: var(--surface-sub); color: var(--ink-light); cursor: not-allowed; }
+    .btn-export.processing { background: var(--brand); color: #fff; opacity: .75; cursor: not-allowed; }
+    .btn-export svg { width: 16px; height: 16px; }
+
+    /* ── Sidebar footer — job card ─────────────────────────── */
+    .job-card {
+      border-top: 1px solid var(--border); background: var(--surface);
+      padding: 16px 20px;
+    }
+    .job-id { font-size: 11px; color: var(--ink-light); font-family: 'JetBrains Mono', monospace; }
+    .progress-bar { height: 6px; background: var(--surface-sub); border-radius: 999px; overflow: hidden; margin: 10px 0; }
+    .progress-fill { height: 100%; background: var(--brand); border-radius: 999px; transition: width .5s; }
+    .job-status { font-size: 13px; font-weight: 500; color: var(--brand); display: flex; align-items: center; gap: 6px; }
+    .job-status.done { color: var(--green); }
+    .job-status.fail { color: var(--red); }
+    .btn-download {
+      margin-top: 10px; width: 100%; border: none; cursor: pointer; font-family: inherit;
+      background: var(--green); color: #fff; border-radius: 10px; padding: 11px;
+      font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-download svg { width: 15px; height: 15px; }
+
+    /* ── Map area ───────────────────────────────────────────── */
+    .map-area {
+      flex: 1; position: relative; overflow: hidden;
+      background: #e8edf4;
+    }
+    /* Fake map tiles grid */
+    .map-bg {
+      position: absolute; inset: 0;
+      background-image:
+        /* subtle tile grid */
+        repeating-linear-gradient(0deg, transparent, transparent 255px, rgba(160,174,192,.18) 256px),
+        repeating-linear-gradient(90deg, transparent, transparent 255px, rgba(160,174,192,.18) 256px),
+        /* base map colours */
+        linear-gradient(135deg, #dce8d4 0%, #cdd9e8 40%, #e8dcc8 70%, #d4e0cc 100%);
+    }
+    /* Water shape */
+    .map-water-1 {
+      position: absolute; top: 30%; left: 20%; width: 22%; height: 8%;
+      background: #b3d1e8; border-radius: 40% 60% 55% 45% / 40% 50% 65% 50%;
+      opacity: .8;
+    }
+    .map-water-2 {
+      position: absolute; top: 54%; left: 60%; width: 18%; height: 6%;
+      background: #b3d1e8; border-radius: 55% 45% 40% 60% / 50% 45% 60% 40%;
+      opacity: .75;
+    }
+    /* Urban fill */
+    .map-urban {
+      position: absolute; top: 38%; left: 40%; width: 12%; height: 10%;
+      background: #d6cfc4; border-radius: 4px; opacity: .7;
+    }
+    .map-urban-2 {
+      position: absolute; top: 60%; left: 25%; width: 8%; height: 7%;
+      background: #d6cfc4; border-radius: 4px; opacity: .6;
+    }
+    /* Drawn AOI polygon overlay */
+    .map-aoi {
+      position: absolute; top: 22%; left: 30%; width: 38%; height: 45%;
+      border: 2.5px dashed #1e44d4; background: rgba(47,95,245,.10);
+      border-radius: 2px;
+      clip-path: polygon(8% 0%, 94% 6%, 100% 55%, 88% 100%, 12% 92%, 0% 40%);
+    }
+    /* Road lines */
+    .map-road {
+      position: absolute; background: #b0a090; border-radius: 2px;
+    }
+    .map-road.r1 { top: 45%; left: 0; width: 100%; height: 3px; }
+    .map-road.r2 { top: 0; left: 48%; width: 3px; height: 100%; }
+    .map-road.r3 { top: 25%; left: 15%; width: 50%; height: 2px; transform: rotate(22deg); }
+
+    /* Draw controls (fake) */
+    .map-ctrl-draw {
+      position: absolute; top: 12px; left: 12px;
+      background: var(--surface); border-radius: 8px; box-shadow: 0 1px 4px rgb(0 0 0/.15);
+      overflow: hidden; border: 1px solid var(--border);
+    }
+    .map-ctrl-btn {
+      width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: background .12s; border: none; background: transparent;
+      font-size: 16px;
+    }
+    .map-ctrl-btn:hover { background: var(--surface-sub); }
+    .map-ctrl-btn + .map-ctrl-btn { border-top: 1px solid var(--border); }
+
+    /* Nav controls (fake) */
+    .map-ctrl-nav {
+      position: absolute; top: 12px; right: 12px;
+      background: var(--surface); border-radius: 8px; box-shadow: 0 1px 4px rgb(0 0 0/.15);
+      overflow: hidden; border: 1px solid var(--border);
+    }
+
+    /* Scale bar */
+    .map-scale {
+      position: absolute; bottom: 28px; right: 12px;
+      background: rgba(255,255,255,.85); border: 1.5px solid var(--ink-light);
+      border-top: none; font-size: 10px; font-family: 'JetBrains Mono', monospace;
+      color: var(--ink-muted); padding: 2px 8px; border-radius: 0 0 4px 4px;
+    }
+
+    /* Attribution */
+    .map-attr {
+      position: absolute; bottom: 8px; right: 8px;
+      font-size: 10px; color: var(--ink-light);
+      background: rgba(255,255,255,.75); padding: 2px 6px; border-radius: 4px;
+    }
+
+    /* AOI hint overlay */
+    .map-hint {
+      position: absolute; bottom: 48px; left: 50%; transform: translateX(-50%);
+      background: rgba(255,255,255,.90); backdrop-filter: blur(8px);
+      border: 1px solid var(--border); border-radius: 10px; padding: 8px 16px;
+      font-size: 13px; color: var(--ink-muted); display: flex; align-items: center; gap: 8px;
+      box-shadow: var(--shadow-panel); white-space: nowrap;
+    }
+
+    /* Vertex handles */
+    .map-vertex {
+      position: absolute; width: 10px; height: 10px; border-radius: 50%;
+      background: #ffcb2f; border: 2px solid #fff; box-shadow: 0 1px 3px rgb(0 0 0/.2);
+    }
+
+    /* ── State tabs (mockup switcher) ───────────────────────── */
+    .state-bar {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: rgba(255,255,255,.92); backdrop-filter: blur(6px);
+      border-top: 1px solid var(--border);
+      display: flex; gap: 0; font-size: 12px;
+    }
+    .state-btn {
+      flex: 1; padding: 8px 4px; text-align: center; cursor: pointer; font-weight: 500;
+      color: var(--ink-muted); border: none; background: transparent; font-family: inherit;
+      transition: color .15s, background .15s; border-right: 1px solid var(--border);
+    }
+    .state-btn:last-child { border-right: none; }
+    .state-btn.active { color: var(--brand); background: var(--brand-faint); }
+    .state-btn:hover:not(.active) { background: var(--surface-sub); }
+
+    /* ── Spinner ────────────────────────────────────────────── */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spin { animation: spin .8s linear infinite; display: inline-block; }
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ── NAVBAR ──────────────────────────────────────────────────── -->
+  <header class="navbar">
+    <div class="logo-box">
+      <svg viewBox="0 0 32 32"><path d="M16 4C10.477 4 6 8.477 6 14c0 7.732 10 18 10 18s10-10.268 10-18c0-5.523-4.477-10-10-10zm0 13a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/></svg>
+    </div>
+    <span class="logo-text">OSM <span>Broker</span></span>
+    <div class="divider"></div>
+    <span class="tagline">Search · Clip · Export OpenStreetMap data with GIS symbology</span>
+    <div class="navbar-right">
+      <span class="live-badge"><span class="live-dot"></span>Live OSM data</span>
+      <a href="#" class="github-link" aria-label="GitHub">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2z"/></svg>
+      </a>
+    </div>
+  </header>
+
+  <!-- ── BODY ────────────────────────────────────────────────────── -->
+  <div class="body">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="width:16px;height:16px;color:var(--brand)"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Export configurator
+        </div>
+        <div class="sidebar-sub">Disegna l'AOI sulla mappa, scegli il formato e avvia l'export.</div>
+      </div>
+
+      <div class="sidebar-body" id="sidebar-body">
+        <!-- AOI status injected by JS -->
+        <div id="aoi-section"></div>
+
+        <!-- Format selector -->
+        <div id="format-section">
+          <div class="section-label">Formato output</div>
+          <div class="fmt-grid" id="fmt-grid">
+            <button class="fmt-card active" data-fmt="gpkg" onclick="selectFmt(this)">
+              <div class="fmt-icon">🟩</div>
+              <div class="fmt-name">GeoPackage</div>
+              <div class="fmt-desc">Standard OGC, compatibile QGIS/ArcGIS</div>
+              <div class="fmt-ext">.gpkg</div>
+            </button>
+            <button class="fmt-card" data-fmt="geojson" onclick="selectFmt(this)">
+              <div class="fmt-icon">🔵</div>
+              <div class="fmt-name">GeoJSON</div>
+              <div class="fmt-desc">Standard web-GIS, human-readable</div>
+              <div class="fmt-ext">.geojson</div>
+            </button>
+            <button class="fmt-card" data-fmt="fgdb" onclick="selectFmt(this)">
+              <div class="fmt-icon">🟧</div>
+              <div class="fmt-name">File Geodatabase</div>
+              <div class="fmt-desc">Formato nativo Esri ArcGIS</div>
+              <div class="fmt-ext">.gdb</div>
+            </button>
+            <button class="fmt-card" data-fmt="duckdb" onclick="selectFmt(this)">
+              <div class="fmt-icon">🦆</div>
+              <div class="fmt-name">DuckDB / GeoParquet</div>
+              <div class="fmt-desc">Analisi OLAP ad alte prestazioni</div>
+              <div class="fmt-ext">.duckdb</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Symbology toggle -->
+        <div>
+          <div class="section-label">Simbologia QGIS</div>
+          <div class="toggle-row">
+            <div class="toggle-track" id="toggle-track" onclick="toggleSymbology()">
+              <div class="toggle-thumb" id="toggle-thumb"></div>
+            </div>
+            <div class="toggle-label">
+              <div class="label-main" id="toggle-main">Includi file .qml</div>
+              <div class="label-sub" id="toggle-sub">ZIP con stili SwissMap-OSM per QGIS</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Export button -->
+        <button class="btn-export disabled" id="btn-export" disabled onclick="handleExport()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 16V20a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Disegna prima un'area di interesse
+        </button>
+      </div>
+
+      <!-- Job card (hidden initially) -->
+      <div class="job-card" id="job-card" style="display:none"></div>
+    </aside>
+
+    <!-- MAP -->
+    <main class="map-area" id="map-area">
+      <div class="map-bg"></div>
+      <!-- Shapes -->
+      <div class="map-road r1"></div>
+      <div class="map-road r2"></div>
+      <div class="map-road r3"></div>
+      <div class="map-water-1"></div>
+      <div class="map-water-2"></div>
+      <div class="map-urban"></div>
+      <div class="map-urban-2"></div>
+      <!-- AOI polygon (hidden until state=aoi) -->
+      <div class="map-aoi" id="map-aoi" style="display:none"></div>
+      <!-- Vertex handles -->
+      <div class="map-vertex" id="v1" style="display:none;top:21%;left:37%"></div>
+      <div class="map-vertex" id="v2" style="display:none;top:22%;left:68%"></div>
+      <div class="map-vertex" id="v3" style="display:none;top:67%;left:70%"></div>
+      <div class="map-vertex" id="v4" style="display:none;top:68%;left:30%"></div>
+
+      <!-- Draw controls -->
+      <div class="map-ctrl-draw">
+        <button class="map-ctrl-btn" title="Draw polygon" onclick="setState('aoi')">▱</button>
+        <button class="map-ctrl-btn" title="Delete">🗑</button>
+      </div>
+      <!-- Nav controls -->
+      <div class="map-ctrl-nav">
+        <button class="map-ctrl-btn">＋</button>
+        <button class="map-ctrl-btn" style="border-top:1px solid var(--border)">－</button>
+      </div>
+      <div class="map-scale">10 km</div>
+      <div class="map-attr">© OpenStreetMap contributors</div>
+
+      <!-- Hint overlay -->
+      <div class="map-hint" id="map-hint">
+        ▱ Clicca sul pulsante poligono per disegnare l'area di interesse
+      </div>
+
+      <!-- State switcher bar (mockup only) -->
+      <div class="state-bar">
+        <button class="state-btn active" id="s-idle"       onclick="setState('idle')">① Idle</button>
+        <button class="state-btn"        id="s-aoi"        onclick="setState('aoi')">② AOI disegnata</button>
+        <button class="state-btn"        id="s-toobig"     onclick="setState('toobig')">③ AOI troppo grande</button>
+        <button class="state-btn"        id="s-processing" onclick="setState('processing')">④ Processing</button>
+        <button class="state-btn"        id="s-ready"      onclick="setState('ready')">⑤ Pronto download</button>
+        <button class="state-btn"        id="s-error"      onclick="setState('error')">⑥ Errore</button>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+/* ── State machine ─────────────────────────────────────────────── */
+let symbologyOn = true
+
+const states = ['idle','aoi','toobig','processing','ready','error']
+
+function setState(s) {
+  states.forEach(id => {
+    document.getElementById('s-'+id).classList.remove('active')
+  })
+  document.getElementById('s-'+s).classList.add('active')
+
+  // map AOI
+  const showAoi = ['aoi','processing','ready','error'].includes(s)
+  document.getElementById('map-aoi').style.display = showAoi ? 'block' : 'none'
+  ;['v1','v2','v3','v4'].forEach(v => {
+    document.getElementById(v).style.display = showAoi ? 'block' : 'none'
+  })
+  document.getElementById('map-hint').style.display = s === 'idle' ? 'flex' : 'none'
+
+  renderSidebar(s)
+}
+
+function renderSidebar(s) {
+  const aoiSection = document.getElementById('aoi-section')
+  const btnExport  = document.getElementById('btn-export')
+  const jobCard    = document.getElementById('job-card')
+
+  jobCard.style.display = 'none'
+
+  switch (s) {
+    case 'idle':
+      aoiSection.innerHTML = `
+        <div>
+          <div class="section-label">Area of Interest</div>
+          <div class="aoi-empty">Usa lo strumento ▱ sulla mappa per disegnare un poligono.</div>
+        </div>`
+      btnExport.className = 'btn-export disabled'
+      btnExport.disabled = true
+      btnExport.innerHTML = polygonIcon() + 'Disegna prima un\'area di interesse'
+      break
+
+    case 'aoi':
+      aoiSection.innerHTML = `
+        <div>
+          <div class="section-label">Area of Interest</div>
+          <div class="aoi-ok">${checkIcon()} 142.3 km²</div>
+        </div>`
+      btnExport.className = 'btn-export ready'
+      btnExport.disabled = false
+      btnExport.innerHTML = packageIcon() + 'Avvia export'
+      break
+
+    case 'toobig':
+      aoiSection.innerHTML = `
+        <div>
+          <div class="section-label">Area of Interest</div>
+          <div class="aoi-warn">
+            <div class="warn-row">${warnIcon()} 687.5 km² <span style="margin-left:auto;font-weight:400;font-size:11px">(max 500 km²)</span></div>
+            <div style="font-size:11px;margin-top:2px">Ridisegna un'area più piccola.</div>
+          </div>
+        </div>`
+      btnExport.className = 'btn-export disabled'
+      btnExport.disabled = true
+      btnExport.innerHTML = warnIcon() + 'AOI troppo grande'
+      break
+
+    case 'processing':
+      aoiSection.innerHTML = `
+        <div>
+          <div class="section-label">Area of Interest</div>
+          <div class="aoi-ok">${checkIcon()} 142.3 km²</div>
+        </div>`
+      btnExport.className = 'btn-export processing'
+      btnExport.disabled = true
+      btnExport.innerHTML = spinnerIcon() + 'Elaborazione in corso…'
+      jobCard.style.display = 'block'
+      jobCard.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <span class="job-id">#3f8a21c0</span>
+          <span style="font-size:11px;color:var(--ink-light)">GeoPackage + .qml</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:58%"></div></div>
+        <div class="job-status">${spinnerIcon()} Conversione GDAL in corso… (58%)</div>`
+      break
+
+    case 'ready':
+      aoiSection.innerHTML = `
+        <div>
+          <div class="section-label">Area of Interest</div>
+          <div class="aoi-ok">${checkIcon()} 142.3 km²</div>
+        </div>`
+      btnExport.className = 'btn-export disabled'
+      btnExport.disabled = true
+      btnExport.innerHTML = checkIcon() + 'Export completato'
+      jobCard.style.display = 'block'
+      jobCard.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <span class="job-id">#3f8a21c0</span>
+          <button onclick="setState('idle')" style="background:none;border:none;cursor:pointer;color:var(--ink-light);font-size:14px" title="Nuovo export">↺</button>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+        <div class="job-status done">${checkIcon()} Pronto per il download</div>
+        <a href="#" class="btn-download" onclick="return false">${downloadIcon()} Scarica ZIP (142.3 km²)</a>
+        <div style="margin-top:8px;font-size:11px;color:var(--ink-light)">
+          Contenuto: <code style="font-family:monospace">roads.gpkg</code>, <code style="font-family:monospace">buildings.gpkg</code>, <code style="font-family:monospace">waterways.gpkg</code>… + 13 file .qml
+        </div>`
+      break
+
+    case 'error':
+      aoiSection.innerHTML = `
+        <div>
+          <div class="section-label">Area of Interest</div>
+          <div class="aoi-ok">${checkIcon()} 142.3 km²</div>
+        </div>`
+      btnExport.className = 'btn-export ready'
+      btnExport.disabled = false
+      btnExport.innerHTML = packageIcon() + 'Riprova export'
+      jobCard.style.display = 'block'
+      jobCard.innerHTML = `
+        <div style="border-radius:10px;background:var(--red-bg);border:1px solid var(--red-border);padding:12px">
+          <div style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--red);margin-bottom:4px">${warnIcon()} Errore</div>
+          <div style="font-size:12px;color:var(--red)">raw-data-api timeout: area troppo complessa. Prova a ridurre il numero di layer o l'estensione.</div>
+        </div>`
+      break
+  }
+}
+
+/* ── Format selection ──────────────────────────────────────────── */
+function selectFmt(btn) {
+  document.querySelectorAll('.fmt-card').forEach(c => c.classList.remove('active'))
+  btn.classList.add('active')
+}
+
+/* ── Symbology toggle ──────────────────────────────────────────── */
+function toggleSymbology() {
+  symbologyOn = !symbologyOn
+  const track = document.getElementById('toggle-track')
+  const thumb = document.getElementById('toggle-thumb')
+  const main  = document.getElementById('toggle-main')
+  const sub   = document.getElementById('toggle-sub')
+  if (symbologyOn) {
+    track.style.background = 'var(--brand)'
+    thumb.style.left = 'calc(100% - 17px)'
+    main.textContent = 'Includi file .qml'
+    sub.textContent  = 'ZIP con stili SwissMap-OSM per QGIS'
+  } else {
+    track.style.background = 'var(--border)'
+    thumb.style.left = '3px'
+    main.textContent = 'Solo geodati'
+    sub.textContent  = 'Nessun file di stile allegato'
+  }
+}
+
+/* ── Export click (demo) ───────────────────────────────────────── */
+function handleExport() {
+  const current = states.find(s => document.getElementById('s-'+s).classList.contains('active'))
+  if (current === 'aoi') setState('processing')
+}
+
+/* ── Icons (inline SVG strings) ───────────────────────────────── */
+function checkIcon()    { return `<svg style="width:15px;height:15px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>` }
+function warnIcon()     { return `<svg style="width:15px;height:15px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>` }
+function packageIcon()  { return `<svg style="width:15px;height:15px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>` }
+function downloadIcon() { return `<svg style="width:14px;height:14px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>` }
+function polygonIcon()  { return `<svg style="width:15px;height:15px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5"/></svg>` }
+function spinnerIcon()  { return `<svg style="width:14px;height:14px;flex-shrink:0" class="spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>` }
+
+/* ── Init ──────────────────────────────────────────────────────── */
+setState('idle')
+</script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+###############################################################################
+# OSM Broker — Render deployment manifest
+# Servizi: frontend (static) · api (FastAPI+GDAL) · worker · redis
+###############################################################################
+
+services:
+
+  # ── 1. Frontend static site ─────────────────────────────────────────────
+  - type: web
+    name: osm-broker-frontend
+    runtime: static
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: frontend/dist
+    pullRequestPreviewsEnabled: true
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: public, max-age=0, must-revalidate
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_URL
+        value: https://osm-broker-api.onrender.com/api
+      - key: VITE_AUTH_ENABLED
+        value: "false"
+
+  # ── 2. API (FastAPI + GDAL) ──────────────────────────────────────────────
+  - type: web
+    name: osm-broker-api
+    runtime: docker
+    dockerfilePath: backend/Dockerfile
+    dockerContext: .
+    plan: standard
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: DEBUG
+        value: "false"
+      - key: REDIS_URL
+        fromService:
+          name: osm-broker-redis
+          type: redis
+          property: connectionString
+      - key: HOT_RAW_DATA_API_URL
+        value: https://api-prod.raw-data.hotosm.org/v1
+      - key: MAX_AREA_KM2
+        value: "500"
+      - key: AUTH_ENABLED
+        value: "false"
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: QML_DIR
+        value: /app/resources/qstyles_swissmap
+      - key: OUTPUT_DIR
+        value: /tmp/osm_broker_jobs
+
+  # ── 3. Background Worker ─────────────────────────────────────────────────
+  - type: worker
+    name: osm-broker-worker
+    runtime: docker
+    dockerfilePath: worker/Dockerfile
+    dockerContext: .
+    plan: standard
+    envVars:
+      - key: REDIS_URL
+        fromService:
+          name: osm-broker-redis
+          type: redis
+          property: connectionString
+      - key: HOT_RAW_DATA_API_URL
+        value: https://api-prod.raw-data.hotosm.org/v1
+      - key: MAX_AREA_KM2
+        value: "500"
+      - key: WORKER_CONCURRENCY
+        value: "2"
+      - key: QML_DIR
+        value: /app/resources/qstyles_swissmap
+      - key: OUTPUT_DIR
+        value: /tmp/osm_broker_jobs
+
+  # ── 4. Redis ─────────────────────────────────────────────────────────────
+  - type: redis
+    name: osm-broker-redis
+    plan: free
+    maxmemoryPolicy: allkeys-lru
+    ipAllowList: []
