@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react'
 import maplibregl from 'maplibre-gl'
-// @ts-expect-error types loaded separately
+// @ts-ignore
 import MapboxDraw from '@mapbox/mapbox-gl-draw'
 import * as turf from '@turf/turf'
 import type { AOIFeature } from '../../types'
