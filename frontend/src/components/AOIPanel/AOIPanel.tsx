@@ -79,16 +79,14 @@ export default function AOIPanel({ aoi, areaKm2, job, error, onSubmit, onReset, 
             <button
               type="button"
               onClick={onClearPolygon}
-              disabled={!aoi}
               title="Cancella poligono"
               className={clsx(
-                'inline-flex items-center justify-center rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                aoi
-                  ? 'bg-red-50 hover:bg-red-100 text-red-600 border border-red-200'
-                  : 'bg-surface-subtle text-ink-light cursor-not-allowed',
+                'inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors border',
+                'bg-red-50 hover:bg-red-100 text-red-600 border-red-200',
               )}
             >
               <Trash2 className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Cancella</span>
             </button>
           </div>
 

@@ -44,20 +44,27 @@ export default function MapView({ onAOIChange, drawPolygonRequest = 0, clearPoly
     _updateBbox(mapRef.current, feature)
   }, [onAOIChange])
 
+  const clearCurrentPolygon = useCallback(() => {
+    if (!drawRef.current) return
+    drawRef.current.deleteAll()
+    onAOIChange(null, 0)
+    _clearBbox(mapRef.current)
+  }, [onAOIChange])
+
   const processPendingCommands = useCallback(() => {
     if (!drawRef.current) return
 
     if (drawPolygonRequestRef.current > lastDrawPolygonRequestRef.current) {
       lastDrawPolygonRequestRef.current = drawPolygonRequestRef.current
+      clearCurrentPolygon()
       drawRef.current.changeMode('draw_polygon')
     }
 
     if (clearPolygonRequestRef.current > lastClearPolygonRequestRef.current) {
       lastClearPolygonRequestRef.current = clearPolygonRequestRef.current
-      drawRef.current.deleteAll()
-      handleDrawChange()
+      clearCurrentPolygon()
     }
-  }, [handleDrawChange])
+  }, [clearCurrentPolygon])
 
   useEffect(() => {
     drawPolygonRequestRef.current = drawPolygonRequest
