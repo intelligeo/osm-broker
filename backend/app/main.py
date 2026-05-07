@@ -3,7 +3,8 @@ OSM Broker FastAPI application.
 """
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
@@ -82,6 +83,23 @@ def create_app() -> FastAPI:
             "auth_enabled": settings.auth_enabled,
             "max_area_km2": settings.max_area_km2,
         }
+
+    # ── Frontend static files ─────────────────────────────────────
+    frontend_dist = "/app/frontend/dist"
+    import os
+    if os.path.isdir(frontend_dist):
+        app.mount("/assets", StaticFiles(directory=f"{frontend_dist}/assets"), name="assets")
+
+        @app.get("/", include_in_schema=False)
+        async def serve_index():
+            return FileResponse(f"{frontend_dist}/index.html")
+
+        @app.get("/{full_path:path}", include_in_schema=False)
+        async def serve_spa(full_path: str):
+            file_path = f"{frontend_dist}/{full_path}"
+            if os.path.isfile(file_path):
+                return FileResponse(file_path)
+            return FileResponse(f"{frontend_dist}/index.html")
 
     return app
 
