@@ -7,9 +7,10 @@
 
 ## 1. Gestore del servizio
 
-**INTELLIGEO.ch**  
-Consulenza e sviluppo GIS / Web  
-Terre di Pedemonte, Svizzera  
+**INTELLIGEO.ch by Dr. Sara Lanini-Maggi**  
+Consulenza e sviluppo GIS / Web
+Casella postale 12
+CH-6652 Terre di Pedemonte, Svizzera  
 E-mail: [ask@intelligeo.ch](mailto:ask@intelligeo.ch)  
 Web: [https://www.intelligeo.ch](https://www.intelligeo.ch)
 
