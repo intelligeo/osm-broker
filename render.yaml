@@ -7,7 +7,7 @@ services:
 
   # ── 1. Frontend static site ─────────────────────────────────────────────
   - type: web
-    name: osm-broker-frontend
+    name: osm-broker
     runtime: static
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: frontend/dist
