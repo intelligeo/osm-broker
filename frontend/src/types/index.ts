@@ -49,3 +49,15 @@ export interface ExportRequest {
   format: ExportFormat
   symbology: boolean
 }
+
+// ── Auth / User ────────────────────────────────────────────────────────────
+export interface OsmUserPublic {
+  osm_id: number
+  display_name: string
+  account_created: string
+}
+
+export interface ExchangeResponse {
+  session_token: string
+  user: OsmUserPublic
+}

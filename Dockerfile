@@ -5,7 +5,7 @@ COPY frontend/package.json frontend/package-lock.json* ./
 RUN npm install
 COPY frontend/ ./
 ARG VITE_API_URL=/api
-ARG VITE_AUTH_ENABLED=false
+ARG VITE_AUTH_ENABLED=true
 ENV VITE_API_URL=$VITE_API_URL
 ENV VITE_AUTH_ENABLED=$VITE_AUTH_ENABLED
 RUN npm run build

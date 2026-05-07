@@ -56,6 +56,28 @@ class ExportRequest(BaseModel):
     symbology: bool = True
 
 
+# ── User (OSM identity) ──────────────────────────────────────────────────
+
+class OsmUser(BaseModel):
+    """Profilo utente OSM minimo — ricavato da /api/0.6/user/details."""
+    osm_id: int
+    display_name: str
+    account_created: str   # ISO date string da OSM
+    # access_token OSM cifrato — solo nel backend, mai esposto al client
+    _access_token: str | None = None
+
+    model_config = {"use_enum_values": True}
+
+
+class OsmUserPublic(BaseModel):
+    """Profilo restituito dal /api/auth/me — senza token sensibili."""
+    osm_id: int
+    display_name: str
+    account_created: str
+
+
+# ── Job ───────────────────────────────────────────────────────────────────
+
 class Job(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     status: JobStatus = JobStatus.pending
@@ -67,6 +89,9 @@ class Job(BaseModel):
     download_url: str | None = None
     error_message: str | None = None
     progress: int | None = None      # 0–100
+
+    # Chi ha richiesto il job — None se AUTH_ENABLED=false
+    requested_by: int | None = None   # osm_id
 
     # Campi interni — non esposti nelle risposte pubbliche
     output_path: str | None = None   # path ZIP sul server

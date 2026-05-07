@@ -11,7 +11,7 @@ import logging
 import redis.asyncio as aioredis
 
 from .config import get_settings
-from .models import Job
+from .models import Job, OsmUser
 
 log = logging.getLogger(__name__)
 
@@ -72,3 +72,46 @@ async def ping_redis() -> bool:
         return await r.ping()
     except Exception:
         return False
+
+
+# ── User store ────────────────────────────────────────────────────────────
+
+def _user_key(osm_id: int) -> str:
+    return f"user:{osm_id}"
+
+
+async def save_user(user: OsmUser, access_token: str) -> None:
+    """Salva profilo OSM + token cifrato in Redis."""
+    from .auth import encrypt_token  # import locale per evitare cicli
+    settings = get_settings()
+    r = get_redis()
+    data = user.model_dump()
+    data["_access_token"] = encrypt_token(access_token)
+    await r.set(
+        _user_key(user.osm_id),
+        json.dumps(data),
+        ex=settings.session_ttl_seconds,
+    )
+
+
+async def load_user(osm_id: int) -> tuple[OsmUser, str] | None:
+    """Ritorna (OsmUser, access_token) o None se non trovato."""
+    from .auth import decrypt_token
+    r = get_redis()
+    raw = await r.get(_user_key(osm_id))
+    if raw is None:
+        return None
+    try:
+        data = json.loads(raw)
+        token_enc = data.pop("_access_token", None)
+        user = OsmUser.model_validate(data)
+        token = decrypt_token(token_enc) if token_enc else ""
+        return user, token
+    except Exception:
+        log.exception("Failed to deserialize user %s", osm_id)
+        return None
+
+
+async def delete_user(osm_id: int) -> None:
+    r = get_redis()
+    await r.delete(_user_key(osm_id))

@@ -1,10 +1,16 @@
-import { MapPin, Github, Menu } from 'lucide-react'
+import { MapPin, Github, Menu, LogIn, LogOut, User } from 'lucide-react'
+import type { OsmUserPublic } from '../../types'
 
 interface NavbarProps {
   onToggleSidebar: () => void
+  user: OsmUserPublic | null
+  isLoading: boolean
+  authEnabled: boolean
+  onSignIn: () => void
+  onSignOut: () => Promise<void>
 }
 
-export default function Navbar({ onToggleSidebar }: NavbarProps) {
+export default function Navbar({ onToggleSidebar, user, isLoading, authEnabled, onSignIn, onSignOut }: NavbarProps) {
   return (
     <header className="h-16 bg-white border-b border-surface-border flex items-center px-4 sm:px-6 gap-3 shadow-card z-10 relative">
       {/* Hamburger — solo mobile */}
@@ -40,14 +46,57 @@ export default function Navbar({ onToggleSidebar }: NavbarProps) {
           Live OSM data
         </span>
 
-        {import.meta.env.VITE_AUTH_ENABLED === 'true' && (
-          <button className="text-sm font-medium text-brand-600 hover:text-brand-700 transition-colors">
-            Sign in
-          </button>
+        {/* ── Auth ────────────────────────────────────────────────── */}
+        {authEnabled && (
+          isLoading ? (
+            <span className="text-xs text-ink-light animate-pulse">Loading…</span>
+          ) : user ? (
+            /* Utente autenticato */
+            <div className="flex items-center gap-2">
+              <span
+                className="hidden md:inline-flex items-center gap-1.5 text-xs font-medium
+                           text-ink bg-surface-subtle border border-surface-border
+                           rounded-full px-3 py-1 max-w-[160px] truncate"
+                title={user.display_name}
+              >
+                <User className="w-3.5 h-3.5 shrink-0" />
+                {user.display_name}
+              </span>
+              <button
+                type="button"
+                onClick={onSignOut}
+                aria-label="Sign out"
+                title="Sign out"
+                className="text-ink-light hover:text-ink transition-colors"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
+          ) : (
+            /* Non autenticato */
+            <button
+              type="button"
+              onClick={onSignIn}
+              className="inline-flex items-center gap-1.5 text-sm font-medium
+                         text-brand-600 hover:text-brand-700 transition-colors"
+            >
+              <LogIn className="w-4 h-4" />
+              Sign in with OSM
+            </button>
+          )
         )}
 
         <a
-          href="https://github.com/geometalab/osm-broker"
+          href="https://github.com/intelligeo/osm-broker/blob/main/IMPRESSUM.md"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-xs text-ink-light hover:text-ink transition-colors hidden sm:inline"
+        >
+          Impressum
+        </a>
+
+        <a
+          href="https://github.com/intelligeo/osm-broker"
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Source code on GitHub"

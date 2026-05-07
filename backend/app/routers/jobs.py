@@ -61,11 +61,13 @@ async def create_job(
         )
 
     # ── Crea il Job ──────────────────────────────────────────────────
+    osm_id: int | None = int(_user["sub"]) if _user else None
     job = Job(
         format=req.format,
         symbology=req.symbology,
         area_km2=round(area_km2, 2),
         status=JobStatus.pending,
+        requested_by=osm_id,
     )
     await save_job(job)
 
@@ -136,6 +138,17 @@ async def download_job(
     job = await load_job(job_id)
     if job is None:
         raise HTTPException(status_code=404, detail="Job not found")
+
+    # Ownership check: se authè attiva solo il proprietario (o admin) può scaricare
+    settings = get_settings()
+    if settings.auth_enabled and job.requested_by is not None:
+        current_id = int(_user["sub"]) if _user else None
+        if current_id != job.requested_by:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You are not allowed to download this job.",
+            )
+
     if job.status != JobStatus.ready:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,

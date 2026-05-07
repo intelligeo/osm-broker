@@ -3,6 +3,7 @@ import Navbar from './components/Layout/Navbar'
 import MapView from './components/Map/MapView'
 import AOIPanel from './components/AOIPanel/AOIPanel'
 import { useJob } from './hooks/useJob'
+import { useAuth } from './hooks/useAuth'
 import type { AOIFeature, ExportFormat } from './types'
 
 export default function App() {
@@ -10,6 +11,7 @@ export default function App() {
   const [areaKm2, setAreaKm2] = useState(0)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const { job, error, submit, reset } = useJob()
+  const { user, isLoading, authEnabled, signIn, signOut } = useAuth()
 
   const handleAOIChange = useCallback((feature: AOIFeature | null, km2: number) => {
     setAoi(feature)
@@ -26,7 +28,14 @@ export default function App() {
 
   return (
     <div className="flex flex-col h-screen overflow-hidden">
-      <Navbar onToggleSidebar={() => setSidebarOpen((v) => !v)} />
+      <Navbar
+        onToggleSidebar={() => setSidebarOpen((v) => !v)}
+        user={user}
+        isLoading={isLoading}
+        authEnabled={authEnabled}
+        onSignIn={signIn}
+        onSignOut={signOut}
+      />
       <div className="flex flex-1 overflow-hidden relative">
         {/* Overlay sfondo mobile */}
         {sidebarOpen && (

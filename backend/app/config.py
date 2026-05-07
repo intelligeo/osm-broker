@@ -22,16 +22,27 @@ class Settings(BaseSettings):
     hot_raw_data_api_url: str = "https://api-prod.raw-data.hotosm.org/v1"
     hot_api_timeout: int = 120         # secondi — le export HOT possono essere lente
 
-    # ── Auth — disabilitata per ora, pronta per OAuth2 ───────────────
+    # ── Auth ──────────────────────────────────────────────────────────
     auth_enabled: bool = False
+
+    # Session JWT (firmato dal backend, inviato al client)
     jwt_secret_key: str = "CHANGE_ME_IN_PRODUCTION"
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 60
 
-    # OSM OAuth2 (opzionale)
+    # OSM OAuth2 — public client (no client_secret richiesto per PKCE)
     osm_oauth_client_id: str = ""
-    osm_oauth_client_secret: str = ""
+    # Callback backend (/api/auth/callback) — riceve il code da OSM
     osm_oauth_callback_url: str = "https://osm-broker.onrender.com/api/auth/callback"
+    # Endpoint OSM
+    osm_base_url: str = "https://www.openstreetmap.org"
+    osm_api_url: str = "https://api.openstreetmap.org"
+
+    # URL frontend a cui redirigere dopo callback con ?token=...
+    frontend_url: str = "https://osm-broker.onrender.com"
+
+    # TTL sessione utente in Redis (secondi)
+    session_ttl_seconds: int = 3600   # 1h
 
     # ── Files ────────────────────────────────────────────────────────
     # Path alla cartella dei .qml da allegare allo ZIP
