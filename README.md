@@ -5,7 +5,7 @@
 Progetto sviluppato e mantenuto da **[INTELLIGEO.ch](https://www.intelligeo.ch)** — consulenza e sviluppo GIS/web.
 Per supporto o informazioni: [ask@intelligeo.ch](mailto:ask@intelligeo.ch)
 
-[![CI](https://github.com/<ORG>/osm-broker/actions/workflows/ci.yml/badge.svg)](https://github.com/<ORG>/osm-broker/actions/workflows/ci.yml)
+[![CI](https://github.com/intelligeo/osm-broker/actions/workflows/ci.yml/badge.svg)](https://github.com/intelligeo/osm-broker/actions/workflows/ci.yml)
 [![Deploy](https://img.shields.io/badge/deploy-Render-46E3B7?logo=render)](https://osm-broker.onrender.com)
 
 ---
