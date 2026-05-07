@@ -65,10 +65,10 @@ export default function AOIPanel({ aoi, areaKm2, job, error, onSubmit, onReset, 
             <button
               type="button"
               onClick={onDrawPolygon}
-              disabled={!onDrawPolygon || busy}
+              disabled={busy}
               className={clsx(
                 'flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                onDrawPolygon && !busy
+                !busy
                   ? 'bg-brand-500 hover:bg-brand-600 text-white shadow-sm'
                   : 'bg-surface-subtle text-ink-light cursor-not-allowed',
               )}
@@ -79,11 +79,11 @@ export default function AOIPanel({ aoi, areaKm2, job, error, onSubmit, onReset, 
             <button
               type="button"
               onClick={onClearPolygon}
-              disabled={!onClearPolygon || !aoi}
+              disabled={!aoi}
               title="Cancella poligono"
               className={clsx(
                 'inline-flex items-center justify-center rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                onClearPolygon && aoi
+                aoi
                   ? 'bg-red-50 hover:bg-red-100 text-red-600 border border-red-200'
                   : 'bg-surface-subtle text-ink-light cursor-not-allowed',
               )}

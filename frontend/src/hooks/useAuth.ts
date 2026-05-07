@@ -114,7 +114,10 @@ export function useAuth(): UseAuthResult {
 
   // ── signIn ────────────────────────────────────────────────────────────
   const signIn = useCallback(() => {
-    if (!AUTH_ENABLED) return
+    if (!AUTH_ENABLED) {
+      alert('Login OSM non abilitato in questa build.\nImposta VITE_AUTH_ENABLED=true e VITE_OSM_CLIENT_ID su Render.')
+      return
+    }
     if (!CLIENT_ID) {
       alert('Configurazione OAuth2 OSM mancante.\nImposta VITE_OSM_CLIENT_ID nella dashboard Render.')
       return

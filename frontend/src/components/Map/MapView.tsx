@@ -12,15 +12,18 @@ const MAX_AREA_KM2 = 500
 
 interface MapViewProps {
   onAOIChange: (aoi: AOIFeature | null, areaKm2: number) => void
-  onDrawReady?: (drawPolygon: () => void, clearPolygon: () => void) => void
+  drawPolygonRequest?: number
+  clearPolygonRequest?: number
 }
 
-export default function MapView({ onAOIChange, onDrawReady }: MapViewProps) {
+export default function MapView({ onAOIChange, drawPolygonRequest = 0, clearPolygonRequest = 0 }: MapViewProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<maplibregl.Map | null>(null)
   const drawRef = useRef<MapboxDraw | null>(null)
-  const onDrawReadyRef = useRef(onDrawReady)
-  useEffect(() => { onDrawReadyRef.current = onDrawReady }, [onDrawReady])
+  const drawPolygonRequestRef = useRef(drawPolygonRequest)
+  const clearPolygonRequestRef = useRef(clearPolygonRequest)
+  const lastDrawPolygonRequestRef = useRef(0)
+  const lastClearPolygonRequestRef = useRef(0)
 
   const handleDrawChange = useCallback(() => {
     if (!drawRef.current) return
@@ -40,6 +43,31 @@ export default function MapView({ onAOIChange, onDrawReady }: MapViewProps) {
     onAOIChange(areaKm2 <= MAX_AREA_KM2 ? feature : null, areaKm2)
     _updateBbox(mapRef.current, feature)
   }, [onAOIChange])
+
+  const processPendingCommands = useCallback(() => {
+    if (!drawRef.current) return
+
+    if (drawPolygonRequestRef.current > lastDrawPolygonRequestRef.current) {
+      lastDrawPolygonRequestRef.current = drawPolygonRequestRef.current
+      drawRef.current.changeMode('draw_polygon')
+    }
+
+    if (clearPolygonRequestRef.current > lastClearPolygonRequestRef.current) {
+      lastClearPolygonRequestRef.current = clearPolygonRequestRef.current
+      drawRef.current.deleteAll()
+      handleDrawChange()
+    }
+  }, [handleDrawChange])
+
+  useEffect(() => {
+    drawPolygonRequestRef.current = drawPolygonRequest
+    processPendingCommands()
+  }, [drawPolygonRequest, processPendingCommands])
+
+  useEffect(() => {
+    clearPolygonRequestRef.current = clearPolygonRequest
+    processPendingCommands()
+  }, [clearPolygonRequest, processPendingCommands])
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return
@@ -88,20 +116,14 @@ export default function MapView({ onAOIChange, onDrawReady }: MapViewProps) {
 
     mapRef.current = map
     drawRef.current = draw
-
-    if (onDrawReadyRef.current) {
-      onDrawReadyRef.current(
-        () => draw.changeMode('draw_polygon'),
-        () => { draw.deleteAll(); handleDrawChange() },
-      )
-    }
+    processPendingCommands()
 
     return () => {
       map.remove()
       mapRef.current = null
       drawRef.current = null
     }
-  }, [handleDrawChange])
+  }, [handleDrawChange, processPendingCommands])
 
   return (
     <div

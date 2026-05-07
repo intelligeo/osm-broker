@@ -10,7 +10,8 @@ export default function App() {
   const [aoi, setAoi] = useState<AOIFeature | null>(null)
   const [areaKm2, setAreaKm2] = useState(0)
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [drawFns, setDrawFns] = useState<{ drawPolygon: () => void; clearPolygon: () => void } | null>(null)
+  const [drawPolygonRequest, setDrawPolygonRequest] = useState(0)
+  const [clearPolygonRequest, setClearPolygonRequest] = useState(0)
   const { job, error, submit, reset } = useJob()
   const { user, isLoading, authEnabled, signIn, signOut } = useAuth()
 
@@ -19,8 +20,12 @@ export default function App() {
     setAreaKm2(km2)
   }, [])
 
-  const handleDrawReady = useCallback((drawPolygon: () => void, clearPolygon: () => void) => {
-    setDrawFns({ drawPolygon, clearPolygon })
+  const handleDrawPolygon = useCallback(() => {
+    setDrawPolygonRequest((value: number) => value + 1)
+  }, [])
+
+  const handleClearPolygon = useCallback(() => {
+    setClearPolygonRequest((value: number) => value + 1)
   }, [])
 
   const handleSubmit = useCallback(
@@ -66,14 +71,18 @@ export default function App() {
             onSubmit={handleSubmit}
             onReset={reset}
             onClose={() => setSidebarOpen(false)}
-            onDrawPolygon={drawFns?.drawPolygon}
-            onClearPolygon={drawFns?.clearPolygon}
+            onDrawPolygon={handleDrawPolygon}
+            onClearPolygon={handleClearPolygon}
           />
         </div>
 
         {/* Mappa */}
         <main className="flex-1 relative min-w-0">
-          <MapView onAOIChange={handleAOIChange} onDrawReady={handleDrawReady} />
+          <MapView
+            onAOIChange={handleAOIChange}
+            drawPolygonRequest={drawPolygonRequest}
+            clearPolygonRequest={clearPolygonRequest}
+          />
           {!aoi && areaKm2 === 0 && (
             <div className="absolute bottom-12 left-1/2 -translate-x-1/2 pointer-events-none">
               <div className="panel-glass px-4 py-2 text-sm text-ink-muted flex items-center gap-2 shadow-panel">

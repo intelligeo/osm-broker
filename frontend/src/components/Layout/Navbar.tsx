@@ -47,43 +47,42 @@ export default function Navbar({ onToggleSidebar, user, isLoading, authEnabled, 
         </span>
 
         {/* ── Auth ────────────────────────────────────────────────── */}
-        {authEnabled && (
-          isLoading ? (
-            <span className="text-xs text-ink-light animate-pulse">Loading…</span>
-          ) : user ? (
-            /* Utente autenticato */
-            <div className="flex items-center gap-2">
-              <span
-                className="hidden md:inline-flex items-center gap-1.5 text-xs font-medium
-                           text-ink bg-surface-subtle border border-surface-border
-                           rounded-full px-3 py-1 max-w-[160px] truncate"
-                title={user.display_name}
-              >
-                <User className="w-3.5 h-3.5 shrink-0" />
-                {user.display_name}
-              </span>
-              <button
-                type="button"
-                onClick={onSignOut}
-                aria-label="Sign out"
-                title="Sign out"
-                className="text-ink-light hover:text-ink transition-colors"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
-            </div>
-          ) : (
-            /* Non autenticato */
+        {isLoading ? (
+          <span className="text-xs text-ink-light animate-pulse">Loading…</span>
+        ) : user ? (
+          /* Utente autenticato */
+          <div className="flex items-center gap-2">
+            <span
+              className="hidden md:inline-flex items-center gap-1.5 text-xs font-medium
+                         text-ink bg-surface-subtle border border-surface-border
+                         rounded-full px-3 py-1 max-w-[160px] truncate"
+              title={user.display_name}
+            >
+              <User className="w-3.5 h-3.5 shrink-0" />
+              {user.display_name}
+            </span>
             <button
               type="button"
-              onClick={onSignIn}
-              className="inline-flex items-center gap-1.5 text-sm font-medium
-                         text-brand-600 hover:text-brand-700 transition-colors"
+              onClick={onSignOut}
+              aria-label="Sign out"
+              title="Sign out"
+              className="text-ink-light hover:text-ink transition-colors"
             >
-              <LogIn className="w-4 h-4" />
-              Sign in with OSM
+              <LogOut className="w-4 h-4" />
             </button>
-          )
+          </div>
+        ) : (
+          /* Non autenticato */
+          <button
+            type="button"
+            onClick={onSignIn}
+            title={authEnabled ? 'Sign in with OpenStreetMap' : 'Login OSM non ancora configurato'}
+            className="inline-flex items-center gap-1.5 text-sm font-medium
+                       text-brand-600 hover:text-brand-700 transition-colors"
+          >
+            <LogIn className="w-4 h-4" />
+            Sign in with OSM
+          </button>
         )}
 
         <a
